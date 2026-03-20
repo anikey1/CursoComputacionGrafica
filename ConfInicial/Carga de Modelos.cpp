@@ -1,8 +1,8 @@
 //
-// Previo 6
+// Practica 6
 // Anikey Andrea Gomez Guzman
 // 319323290
-// Fecha de entrega: 15 de Marzo, 2026
+// Fecha de entrega: 20 de Marzo, 2026
 // Carga de modelos y camara Sintetica
 //
 
@@ -40,7 +40,7 @@ void DoMovement( );
 
 
 // Camera
-Camera camera( glm::vec3( 0.0f, 0.0f, 3.0f ) );
+Camera camera( glm::vec3( 2.0f, 3.0f, 3.0f ) );
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
 bool firstMouse = true;
@@ -102,9 +102,17 @@ int main( )
     Shader shader( "Shader/modelLoading.vs", "Shader/modelLoading.frag" );
     
     // Load models
-	Model dog((char*)"Models/RedDog.obj");
+	Model dog((char*)"Models/Perro/RedDog.obj");
+    Model sofa((char*)"Models/Sofa/Sofa.obj");
+	Model pizza((char*)"Models/Pizza/Pizza.obj");
+	Model control((char*)"Models/Control/Control.obj");
+	Model glass((char*)"Models/Glass/Glass.obj");
+	Model lentes((char*)"Models/Lentes/Lentes.obj");
+	Model Mesa((char*)"Models/Mesa/Mesa.obj");
+	//Model tv((char*)"Models/tv/tv.obj");
     glm::mat4 projection = glm::perspective( camera.GetZoom( ), ( float )SCREEN_WIDTH/( float )SCREEN_HEIGHT, 0.1f, 100.0f );
     
+
   
 
     // Game loop
@@ -120,7 +128,7 @@ int main( )
         DoMovement();
 
         // Clear the colorbuffer
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        glClearColor(0.92f, 0.77f, 0.56f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.Use();
@@ -131,13 +139,72 @@ int main( )
 
         // Draw the loaded model
         glm::mat4 model(1);
+        model = glm::translate(model, glm::vec3(-0.8f, 0.0f, -1.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		dog.Draw(shader);
 
-		model = glm::translate(model, glm::vec3(3.0f, 0.0f, 0.0f));    
+        // SOFÁ
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, -2.0f));
+        model = glm::scale(model, glm::vec3(1.5f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        sofa.Draw(shader);
+
+        ////////////////// PIZZA
+        model = glm::mat4(1);
+        model = glm::translate(model, glm::vec3(-0.35f, -0.37f, -0.5f));
+
+        //acostarla
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(3.0f, 0.0f, 1.0f));
+        model = glm::rotate(model, glm::radians(-20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 0.1f));
+        model = glm::scale(model, glm::vec3(0.025f, 0.025f, 0.025f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        pizza.Draw(shader);
+        
+        ////////////////CONTROL
+        model = glm::mat4(1);
+        model = glm::translate(model, glm::vec3(-1.0f, -0.37f, -0.52f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(3.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 0.1f));
+        model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        control.Draw(shader);
+
+        //////////////DRINK
+        model = glm::mat4(1);
+        model = glm::translate(model, glm::vec3(-0.35f, -0.3f, -0.8));
+
+        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glass.Draw(shader);
+
+        /////glasees
+
+        model = glm::mat4(1);
+        model = glm::translate(model, glm::vec3(-0.8f, 0.15, -0.69f));
+
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(3.0f, 0.0f, 0.0f));
+        model =glm :: rotate(model, glm::radians(-10.0f), glm::vec3(0.01f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.015f, 0.015f, 0.015));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        lentes.Draw(shader);
+        
+        //tv
+        model = glm::mat4(1);
+
+        model = glm::translate(model, glm::vec3(0.5f, -0.9f, 4.0f));
+
+        model = glm::scale(model, glm::vec3(0.022f, 0.022f, 0.022f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        Mesa.Draw(shader);
+        
+
+		//segundo modelo perrito igual pero con transformaciones
+		/*model = glm::translate(model, glm::vec3(3.0f, 0.0f, 0.0f));    
 		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0));	
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		dog.Draw(shader);   
+		dog.Draw(shader); */  
 
         // Swap the buffers
         glfwSwapBuffers( window );
