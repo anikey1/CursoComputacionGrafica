@@ -1,4 +1,5 @@
 ﻿//Practica 9 - Fuentes de Luz
+// Entrega 17 de abril, 2026
 //Anikey Andrea Gomez Guzman 
 //319323290
 
@@ -113,6 +114,7 @@ int main()
     Model lamp((char*)"Models/lamp/lamp.obj");        std::cout << "Lamp OK" << std::endl;
     Model stuff((char*)"Models/stuff/model.obj");     std::cout << "Stuff OK" << std::endl;
     Model arbol((char*)"Models/arb/model.obj");       std::cout << "Arbol OK" << std::endl;
+
     std::cout << "Todos cargados!" << std::endl;
 
     GLuint VBO, VAO;
