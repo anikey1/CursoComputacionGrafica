@@ -1,5 +1,5 @@
-//Previo 10 
-// Entrega 19 de abril, 2026
+//Practica 10 
+// Entrega 24 de abril, 2026
 //Anikey Andrea Gomez Guzman 
 //319323290
 
@@ -102,8 +102,14 @@ float vertices[] = {
 
 glm::vec3 Light1 = glm::vec3(0);
 //Anim
-float rotBall = 0;
 bool AnimBall = false;
+
+const float ORBIT_RADIUS = 2.0f;    // radio de la orbita circular
+const float ANIM_SPEED = 30.0f;  // velocidad 
+float rotBall = -50.0f;  // angulo actual del perro (grados)
+float salto = 0.0f;    // altura extra del perro al saltar
+float cabezazo = 0.0f;    // inclinacion de cabeza al pegar
+glm::mat4 modelTemp(1.0f);
 
 // Deltatime
 GLfloat deltaTime = 0.0f;
@@ -234,17 +240,29 @@ int main()
 		Piso.Draw(lightingShader);
 
 		// Perro
+		// Orbita en X,Z + salto en Y + inclinacion de nariz al pegar
 		model = glm::mat4(1);
+		modelTemp = glm::translate(model, glm::vec3(0.0f, salto / 2.0f, 0.0f));
+		modelTemp = glm::rotate(modelTemp, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(modelTemp, glm::vec3(ORBIT_RADIUS, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(salto + cabezazo), glm::vec3(-1.0f, 0.0f, 0.0f)); // eje -X// <<< negativo para que la nariz baje hacia la pelota
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		Dog.Draw(lightingShader);
 
-		model = glm::mat4(1);
+	
+		// Orbita contraria en X,Z, sube y baja en Y
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
-		model = glm::translate(model, glm::vec3(0.08f, 0.48f + rotBall, -0.25f)); //en lugar de rotate
+		model = glm::mat4(1);
+		// Oscilación vertical: sube cuando perro baja y viceversa
+		float ballY = 0.8f + 0.8f * sin(glm::radians(rotBall));  // oscila entre 0 y 1.6
+		modelTemp = glm::translate(model, glm::vec3(0.0f, ballY, 0.0f));
+		// Orbita opuesta: mismo angulo pero eje Y negativo = sentido contrario
+		modelTemp = glm::rotate(modelTemp, glm::radians(rotBall - 30.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::translate(modelTemp, glm::vec3(ORBIT_RADIUS, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
 		Ball.Draw(lightingShader);
 		glDisable(GL_BLEND);
 		glBindVertexArray(0);
@@ -327,14 +345,43 @@ void Animation()
 {
 	if (AnimBall)
 	{
-		// Oscila entre 0.0 (nariz del perro) y 1.52 (altura de la luz en Y=2.0)
-		// 0.48 base + rotBall llega hasta 2.0 cuando rotBall = 1.52
-		rotBall = 0.86f + 0.86f * sin(glfwGetTime() * 2.0f);
-		printf("%f\n", rotBall);
+		// Avance independiente del framerate
+		rotBall -= ANIM_SPEED * deltaTime;
+
+		if (rotBall < -360.0f)
+			rotBall = 0.0f;
+
+		// Encuentro 1: ~-150 a -210 grados
+		if (rotBall <= -150.0f && rotBall > -210.0f)
+		{
+			float progress = (rotBall + 150.0f) / -60.0f;  // 0 -> 1
+			salto = sin(progress * glm::pi<float>()) * 0.9f;
+			cabezazo = sin(progress * glm::pi<float>()) * 35.0f;
+		}
+		// Encuentro 2: ~-330 a -360 grados
+		else if (rotBall <= -330.0f && rotBall > -360.0f)
+		{
+			float progress = (rotBall + 330.0f) / -60.0f;
+			salto = sin(progress * glm::pi<float>()) * 0.9f;
+			cabezazo = sin(progress * glm::pi<float>()) * 35.0f;
+		}
+		// Suavizado al reiniciar
+		else if (rotBall <= 0.0f && rotBall > -30.0f)
+		{
+			float progress = (rotBall + 330.0f) / -60.0f;
+			salto = sin(progress * glm::pi<float>()) * 0.9f;
+			cabezazo = sin(progress * glm::pi<float>()) * 35.0f;
+		}
+		else
+		{
+			salto = 0.0f;
+			cabezazo = 0.0f;
+		}
 	}
 	else
 	{
-		rotBall = 0.0f;
+		salto = 0.0f;
+		cabezazo = 0.0f;
 	}
 }
 
